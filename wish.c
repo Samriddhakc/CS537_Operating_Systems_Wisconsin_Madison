@@ -28,8 +28,10 @@ char s[100];
 
 int main(int argc,char* argv[]){
 
+
     char inp[100];
-    char*buffer=inp;
+    //char*buffer=inp;
+    char *buffer = malloc(20*sizeof(inp));
     size_t buffer_size=32;
     char*st="exit\n";
 
@@ -41,6 +43,7 @@ int main(int argc,char* argv[]){
 
       printf("wish>");
       getline(&buffer,&buffer_size,stdin);
+      
       char*varb=strtok(buffer," ");
       char*my_argv[10];
       int i=0;
@@ -50,7 +53,6 @@ int main(int argc,char* argv[]){
        varb=strtok(NULL," ");
        i=i+1;
       } 
-
       my_argv[i+1]=NULL;
       if (strcmp(my_argv[0],"cd")==0){
         change_working_dir(my_argv[1]); 
@@ -74,6 +76,7 @@ int main(int argc,char* argv[]){
       }
 
     }
+    free(buffer);
     } 
 
    else{ 
