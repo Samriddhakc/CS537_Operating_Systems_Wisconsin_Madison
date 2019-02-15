@@ -32,10 +32,10 @@ void print_history(char* n)
     printf("Invalid Input!");
   }
 
-  else{
+  else {
 
-  for (int i = 0;i<atoi(n);i++) {
-    printf("%s\n",strings[i]);
+  for (int i = counter-atoi(n);i<counter;i++) {
+    printf("%s",strings[i]);
   }
 
   }
@@ -77,9 +77,9 @@ int main(int argc,char* argv[]){
      while(strcmp(buffer,"exit\n")!=0 && !feof(stdin))
      {
 
-      printf("wish>");
+      printf("wish> ");
       getline(&buffer,&buffer_size,stdin);
-
+      store_history(buffer);
       char*varb=strtok(buffer," ");
       char*my_argv[10];
       int i=0;
@@ -90,22 +90,37 @@ int main(int argc,char* argv[]){
        i=i+1;
       }
       my_argv[i+1]=NULL;
-      if (strcmp(my_argv[0],"cd")==0){
+
+      if (strcmp(my_argv[0],"cd\n")==0){
+          printf("wish> Missing arguments\n");
+        }
+
+      else if (strcmp(my_argv[0],"cd")==0){
+        if(my_argv[2]!=NULL)
+        {
+          printf("wish> More than one arguments!\n");
+        }
         change_working_dir(my_argv[1]);
-        store_history("cd");
+        //store_history("cd");
       }
       else if (strcmp(my_argv[0],"pwd\n")==0){
         view_working_dir();
       }
+      else if (strcmp(my_argv[0],"history\n")==0)
+      {
+      char count_char[20];
+      sprintf(count_char, "%d",counter);
+      print_history(count_char);
+      }
       else if (strcmp(my_argv[0],"history")==0){
-        store_history("history");
+        //store_history("history");
         if (my_argv[1]!=NULL)
         {
         print_history(my_argv[1]);
        }
       }
       else if (strcmp(my_argv[0],"ls\n")==0){
-         store_history("ls");
+         //store_history("ls");
          int rc=fork();
          if (rc==0)
          {
@@ -122,12 +137,74 @@ int main(int argc,char* argv[]){
 
     }
     free(buffer);
+
     }
 
    else{
-    /*read file from batch_script*/
-   }
 
+      /*read file from batch_script*/
+      char curr_array[100]={0};
+      char*current_line=curr_array;
+      size_t buffer_size=99;
+      FILE*fp=fopen(argv[1],"r");
+      if (fp==NULL){
+          printf("cannot open file\n");
+          exit(1);
+        }
+
+      while(fgets(current_line,buffer_size,fp)!=NULL && (strcmp(current_line,"exit")!=0))
+      {
+        char*varb=strtok(current_line," ");
+        char*my_argv[10];
+        int i=0;
+        while (varb!=NULL)
+        {
+        my_argv[i]=varb;
+        varb=strtok(NULL," ");
+        i=i+1;
+        }
+        my_argv[i+1]=NULL;
+
+
+
+        if (strcmp(my_argv[0],"cd")==0){
+         change_working_dir(my_argv[1]);
+         store_history("cd");
+        }
+
+        else if (strcmp(my_argv[0],"pwd\n")==0){
+         view_working_dir();
+        }
+
+        else if (strcmp(my_argv[0],"history")==0){
+         store_history("history");
+         if (my_argv[1]!=NULL)
+         {
+         print_history(my_argv[1]);
+        }
+
+        }
+
+        else if (strcmp(my_argv[0],"ls\n")==0){
+          store_history("ls");
+          int rc=fork();
+          if (rc==0)
+          {
+            char*my_argv_1[10];
+            my_argv_1[0]="/bin/ls";
+            my_argv_1[2]=NULL;
+            int exec_rc=execv("/bin/ls",my_argv_1); //completes replaces the code base by a different process
+          }
+          else
+          {
+          int wait_rc=wait(NULL);
+          }
+        }
+
+      }
+    }
+
+   //malloc variables freed from heap
    for (int i = 0;i<counter;i++) {
        free(strings[i]);
    }

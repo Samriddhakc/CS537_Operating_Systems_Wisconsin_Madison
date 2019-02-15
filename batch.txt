@@ -1,0 +1,5 @@
+ls
+pwd
+cd dir_1
+ls
+history 4
